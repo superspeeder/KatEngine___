@@ -38,10 +38,10 @@ namespace kat {
         template<typename T>
         using remove_ref_cv = std::remove_cv_t<std::remove_reference_t<T>>;
 
-        template<class P, typename base_event_t__>
+        template<class P, typename base_event_t>
         concept valid_listener_func_proto = std::same_as<fproto_ret_t<P>, void>
                 && fproto_argc_v<P> == 1
-                && std::derived_from<shared_ptr_underlying_t<remove_ref_cv<fproto_arg_t<P, 0> > >, base_event_t__>
+                && std::derived_from<shared_ptr_underlying_t<remove_ref_cv<fproto_arg_t<P, 0> > >, base_event_t>
                 && std::is_reference_v<fproto_arg_t<P, 0> > == true
                 && std::is_const_v<std::remove_reference_t<fproto_arg_t<P, 0> > > == true;
 
@@ -49,8 +49,8 @@ namespace kat {
         template<typename L>
         using lambda_nc_ft = std::remove_pointer_t<decltype(+std::declval<L>())>;
 
-        template<typename L, typename base_event_t__>
-        concept valid_listener_func_nc_lambda = valid_listener_func_proto<lambda_nc_ft<L>, base_event_t__>;
+        template<typename L, typename base_event_t>
+        concept valid_listener_func_nc_lambda = valid_listener_func_proto<lambda_nc_ft<L>, base_event_t>;
 
         template<typename L>
         concept lambda_conv_fptr = std::is_function_v<lambda_nc_ft<L>>;
@@ -215,7 +215,16 @@ namespace kat {
             return T::s_globalID;
         };
 
+        using entity_t = entt::entity;
+        using entity_registry_t = entt::basic_registry<entity_t>;
 
+        inline entity_registry_t& entityRegistry() {
+            return m_EntityRegistry;
+        };
+
+        inline const entity_registry_t& entityRegistry() const {
+            return m_EntityRegistry;
+        };
 
     private:
         Engine();
@@ -223,6 +232,7 @@ namespace kat {
         std::unique_ptr<EventManager> m_EventManager;
 
         std::unordered_map<global_id_t, std::any> m_Globals;
+        entity_registry_t m_EntityRegistry{};
     };
 
     namespace event {
@@ -273,4 +283,8 @@ namespace kat {
 
     const std::shared_ptr<Engine>& engine();
     const std::unique_ptr<EventManager>& events();
+
+    inline Engine::entity_registry_t& entityRegistry() {
+        return engine()->entityRegistry();
+    };
 }
