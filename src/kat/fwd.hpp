@@ -19,6 +19,8 @@ namespace kat {
     class Engine;
 
     namespace event {
-        struct BaseEvent {};
+        struct BaseEvent {
+            virtual ~BaseEvent() = default;
+        };
     }
 }

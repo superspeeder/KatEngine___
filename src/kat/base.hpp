@@ -3,6 +3,8 @@
 #include "fwd.hpp"
 #include <tuple>
 
+#define KAT_ENGINE_GLOBAL_SINGLETON static inline ::kat::Engine::global_id_t s_GlobalID = ::kat::Engine::null_global_id;
+
 namespace kat {
     namespace {
         template<typename... T>
@@ -166,12 +168,13 @@ namespace kat {
 
     namespace {
         template<class T, typename global_id_t>
-        concept singleton_global_class = std::same_as<decltype(T::s_globalID), global_id_t>;
+        concept singleton_global_class = std::same_as<decltype(T::s_GlobalID), global_id_t>;
     }
 
     class Engine : public std::enable_shared_from_this<Engine> {
     public:
         using global_id_t = uint64_t;
+        static constexpr global_id_t null_global_id = 0;
 
         static std::shared_ptr<Engine> create();
 
@@ -193,26 +196,26 @@ namespace kat {
 
         template<singleton_global_class<global_id_t> T>
         inline T getGlobal() {
-            return getGlobalTyped<T>(T::s_globalID);
+            return getGlobalTyped<T>(T::s_GlobalID);
         };
 
         template<class T> requires singleton_global_class<shared_ptr_underlying_t<T>, global_id_t>
         inline T getGlobal() {
-            return getGlobalTyped<T>(shared_ptr_underlying_t<T>::s_globalID);
+            return getGlobalTyped<T>(shared_ptr_underlying_t<T>::s_GlobalID);
         };
 
         template<singleton_global_class<global_id_t> T, typename... Args>
         inline global_id_t emplaceGlobalSingleton(Args&&... args) {
             T o = T(std::forward<Args>(args)...);
-            T::s_globalID = addGlobal(o);
-            return T::s_globalID;
+            T::s_GlobalID = addGlobal(o);
+            return T::s_GlobalID;
         };
 
         template<singleton_global_class<global_id_t> T, typename... Args>
         inline global_id_t emplaceGlobalSingletonShared(Args&&... args) {
             std::shared_ptr<T> o = std::make_shared<T>(std::forward<Args>(args)...);
-            T::s_globalID = addGlobal(o);
-            return T::s_globalID;
+            T::s_GlobalID = addGlobal(o);
+            return T::s_GlobalID;
         };
 
         using entity_t = entt::entity;

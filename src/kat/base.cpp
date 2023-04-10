@@ -1,4 +1,5 @@
 #include "base.hpp"
+#include "kat/common/common.hpp"
 #include <eventpp/utilities/argumentadapter.h>
 
 namespace kat {
@@ -11,6 +12,7 @@ namespace kat {
 
     Engine::Engine() : m_EventManager(std::make_unique<EventManager>()) {
         glfwInit();
+        commonSetup();
     }
 
     Engine::~Engine() {
@@ -23,10 +25,12 @@ namespace kat {
 
     void Engine::mainloop() {
         m_EventManager->dispatch<event::EngineConfigure>(shared_from_this());
+
+        
     }
 
     using distrib_t = std::uniform_int_distribution<Engine::global_id_t>;
-    distrib_t distribution{};
+    distrib_t distribution{1};
     std::random_device rd;
     std::mt19937_64 gen(rd());
 
