@@ -7,3 +7,4 @@ run/logs/
 logs/
 *.log
 *.log.*
+.cache/
